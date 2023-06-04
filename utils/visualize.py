@@ -49,14 +49,17 @@ def show_batch(
     plt.show()
         
 def show_loss(
-    loss: List[Tensor],
+    *loss: List[List],
     fig_size: Tuple[int, int] = (6, 4),    
 ) -> None:
     plt.figure(figsize=fig_size)
     
-    plt.plot(loss)
-    plt.title('Train Loss')
-    plt.xlabel('iterations')
-    plt.ylabel('loss')
+    for i, x in enumerate(['train', 'validation']):
+        plt.plot(loss[i], label=x)
+    
+    plt.title('Loss Graph')
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.ylabel('Cross Entropy Loss')
     
     plt.show()
