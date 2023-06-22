@@ -7,18 +7,20 @@ __all__ = [
     'collate_EP',
     'to_tensor',
     'norm_keys',
+    'get_index',
 ]
 
 # custom collate function for variable-size input training PE model
 def collate_PE(batch):
+    # WARNING! Not working on this version.
+    image = [item[0] for item in batch]
+    bbox = torch.stack([item[1] for item in batch]).squeeze()
+    keys = torch.stack([item[2] for item in batch]).squeeze()
+    
     return {
-        'image': [item['image'] for item in batch],                         # list of tensors [B]: (tensor)[3, H, W]
-        'seq': torch.tensor([item['seq'] for item in batch]),               # [B]
-        'frame_idx': torch.tensor([item['frame_idx'] for item in batch]),   # [B]
-        'action': torch.tensor([item['action'] for item in batch]),         # [B]
-        'emotion': torch.tensor([item['emotion'] for item in batch]),       # [B]
-        'bbox': torch.stack([item['bbox'] for item in batch]),              # [B, 4]
-        'keypoints': torch.stack([item['keypoints'] for item in batch]),    # [B, 15, 3]
+        'image': image,
+        'bbox': bbox,
+        'keys': keys
     }
 
 # custom collate function for variable-size input training EP model
@@ -50,3 +52,15 @@ def norm_keys(bbox, keys):
             if keys[i, j, -1] == 0:
                 keys[i, j] = torch.tensor([0, 0, 0], dtype=float)
     return keys
+
+
+def get_index(tensors):
+    def find_largest_index(tensor):
+        _, indices = torch.max(tensor, dim=0)
+        return indices.item()
+    
+    result=[]
+    for tensor in tensors:
+        val=find_largest_index(tensor)
+        result.append(val)
+    return result
